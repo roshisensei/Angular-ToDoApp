@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
 import { newTaskData } from '../task/task.model';
+import { TasksService } from '../tasks.service';
 
 @Component({
   selector: 'app-new-task',
@@ -10,19 +12,26 @@ import { newTaskData } from '../task/task.model';
   styleUrl: './new-task.component.css'
 })
 export class NewTaskComponent {
-  @Output() cancel = new EventEmitter<void>();
+  @Input() userId!:string;
+  @Output() close = new EventEmitter<void>();
   @Output() add  = new EventEmitter<newTaskData>();
+
+  // this will create a  singleton instance of taskService which can be used throughout the application
+  private taskService = inject(TasksService);
+
   enteredTitle ='';
   enteredSummary ='';
   enteredDate = '';
-  onCancel(){
-    this.cancel.emit();
+
+  onClose(){
+    this.close.emit();
   }
   onSubmit(){
-    this.add.emit({
-      title:this.enteredTitle,
+    this.taskService.addTask({
+      title: this.enteredTitle,
       summary:this.enteredSummary,
       dueDate:this.enteredDate,
-    })
+    }, this.userId);
+    this.close.emit();
   }
 }
